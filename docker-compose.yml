@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+    networks:
+      - game-net
+
+  redis:
+    image: "redis:alpine"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - game-net
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "9000:80"
+    networks:
+      - game-net
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - game-net
+
+networks:
+  game-net:
+    driver: bridge
+
+volumes:
+  redis_data:
